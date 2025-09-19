@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador Futurista de Lean Canvas - Versión Mejorada con Zoom y Animaciones</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0c0c0c, #1a1a2e, #16213e);
+            color: #00ffcc;
+            padding: 40px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.8em;
+            text-shadow: 0 0 15px #00ffcc;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            color: #66d9ef;
+            margin-top: 10px;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #00ffcc; }
+            to { text-shadow: 0 0 25px #00ffcc, 0 0 35px #00ffcc; }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+
+        label {
+            font-size: 1em;
+            color: #66d9ef;
+            font-weight: bold;
+        }
+
+        select, button {
+            padding: 15px 25px;
+            background: linear-gradient(45deg, #0f3460, #1e3a8a);
+            border: 2px solid #00ffcc;
+            color: #00ffcc;
+            font-family: inherit;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.4s ease;
+            min-width: 220px;
+            font-size: 1.1em;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+        }
+
+        select:hover, button:hover {
+            box-shadow: 0 0 30px #00ffcc;
+            transform: scale(1.05);
+        }
+
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+            border-color: #ff6b6b;
+            color: #ffffff;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 15px rgba(255, 107, 107, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(255, 107, 107, 0.6); }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-bottom: 40px;
+            color: #66d9ef;
+        }
+
+        .loading.visible {
+            display: block;
+        }
+
+        .spinner {
+            border: 5px solid rgba(0, 255, 204, 0.3);
+            border-radius: 50%;
+            border-top: 5px solid #00ffcc;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .canvas-container {
+            max-width: 1400px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 0 40px rgba(0, 255, 204, 0.3);
+            position: relative;
+        }
+
+        .canvas-title {
+            text-align: center;
+            font-size: 1.8em;
+            color: #ff6b6b;
+            margin-bottom: 30px;
+            text-shadow: 0 0 15px #ff6b6b;
+            animation: titleBounce 1.5s ease-in-out infinite;
+        }
+
+        @keyframes titleBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .lean-canvas {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, auto);
+            gap: 15px;
+            min-height: 600px;
+        }
+
+        .section {
+            background: linear-gradient(135deg, rgba(15, 52, 96, 0.9), rgba(30, 58, 138, 0.8));
+            border: 2px solid #00ffcc;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            min-height: 200px;
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+            transition: all 0.6s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            animation: sectionEnter 0.8s ease-out forwards;
+        }
+
+        @keyframes sectionEnter {
+            0% { opacity: 0; transform: translateY(30px) rotate(-5deg); }
+            100% { opacity: 1; transform: translateY(0) rotate(0); }
+        }
+
+        .section:hover {
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.5);
+            transform: translateY(-5px) scale(1.02);
+        }
+
+        .section::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0,255,204,0.2) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .section:hover::after {
+            opacity: 1;
+            animation: ripple 2s ease-out;
+        }
+
+        @keyframes ripple {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        .section-header {
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #ff6b6b;
+            text-shadow: 0 0 8px #ff6b6b;
+            border-bottom: 2px solid rgba(0, 255, 204, 0.4);
+            padding-bottom: 10px;
+            animation: headerGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes headerGlow {
+            from { text-shadow: 0 0 8px #ff6b6b; }
+            to { text-shadow: 0 0 15px #ff6b6b, 0 0 20px #ff6b6b; }
+        }
+
+        .section-content {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .section-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .section-content::-webkit-scrollbar-thumb {
+            background: #00ffcc;
+            border-radius: 3px;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        li {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(0, 255, 204, 0.15);
+            border-left: 4px solid #00ffcc;
+            border-radius: 6px;
+            font-size: 1em;
+            line-height: 1.5;
+            animation: fadeInUp 0.8s ease-out forwards;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        li:hover {
+            background: rgba(0, 255, 204, 0.25);
+            transform: translateX(5px);
+        }
+
+        li::before {
+            content: '⚡';
+            position: absolute;
+            left: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            animation: spark 1.5s infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes spark {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        li:nth-child(1) { animation-delay: 0.2s; }
+        li:nth-child(2) { animation-delay: 0.4s; }
+        li:nth-child(3) { animation-delay: 0.6s; }
+        li:nth-child(4) { animation-delay: 0.8s; }
+        li:nth-child(5) { animation-delay: 1.0s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Asignación de posiciones sin solapamientos */
+        #problema { grid-column: 1; grid-row: 1; background: linear-gradient(135deg, rgba(255, 107, 107, 0.15), rgba(15, 52, 96, 0.9)); }
+        #solucion { grid-column: 2; grid-row: 1; background: linear-gradient(135deg, rgba(46, 204, 113, 0.15), rgba(30, 58, 138, 0.8)); }
+        #metricas { grid-column: 3; grid-row: 1; background: linear-gradient(135deg, rgba(241, 196, 15, 0.15), rgba(15, 52, 96, 0.9)); }
+        #propuesta { grid-column: 1; grid-row: 2; background: linear-gradient(135deg, rgba(52, 152, 219, 0.15), rgba(30, 58, 138, 0.8)); }
+        #ventaja { grid-column: 2; grid-row: 2; background: linear-gradient(135deg, rgba(155, 89, 182, 0.15), rgba(15, 52, 96, 0.9)); }
+        #canales { grid-column: 3; grid-row: 2; background: linear-gradient(135deg, rgba(26, 188, 156, 0.15), rgba(30, 58, 138, 0.8)); }
+        #segmentos { grid-column: 1; grid-row: 3; background: linear-gradient(135deg, rgba(230, 126, 34, 0.15), rgba(15, 52, 96, 0.9)); }
+        #costos { grid-column: 2; grid-row: 3; background: linear-gradient(135deg, rgba(142, 68, 173, 0.15), rgba(30, 58, 138, 0.8)); }
+        #ingresos { grid-column: 3; grid-row: 3; background: linear-gradient(135deg, rgba(76, 175, 80, 0.15), rgba(15, 52, 96, 0.9)); }
+
+        /* Líneas futuristas de fondo */
+        .canvas-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(0,255,204,0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,255,204,0.15) 1px, transparent 1px);
+            background-size: 25px 25px;
+            pointer-events: none;
+            border-radius: 20px;
+            opacity: 0.8;
+        }
+
+        /* Modal para Zoom */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 3px solid #00ffcc;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 80%;
+            max-height: 80%;
+            overflow-y: auto;
+            animation: zoomIn 0.5s ease-out;
+            box-shadow: 0 0 50px rgba(0, 255, 204, 0.5);
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: #ff6b6b;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .close:hover {
+            color: #00ffcc;
+            transform: rotate(90deg);
+        }
+
+        .modal-header {
+            font-size: 2em;
+            color: #ff6b6b;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .modal-list li {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(0, 255, 204, 0.2);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .lean-canvas {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: auto;
+            }
+
+            #problema { grid-column: 1; grid-row: 1; }
+            #solucion { grid-column: 2; grid-row: 1; }
+            #metricas { grid-column: 1; grid-row: 2; }
+            #propuesta { grid-column: 2; grid-row: 2; }
+            #ventaja { grid-column: 1; grid-row: 3; }
+            #canales { grid-column: 2; grid-row: 3; }
+            #segmentos { grid-column: 1; grid-row: 4; }
+            #costos { grid-column: 2; grid-row: 4; }
+            #ingresos { grid-column: 1 / 3; grid-row: 5; }
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 20px; }
+            .controls { flex-direction: column; }
+            select, button { min-width: 100%; }
+            .lean-canvas {
+                grid-template-columns: 1fr;
+            }
+            .section { min-height: 150px; }
+            #problema { grid-row: 1; }
+            #solucion { grid-row: 2; }
+            #metricas { grid-row: 3; }
+            #propuesta { grid-row: 4; }
+            #ventaja { grid-row: 5; }
+            #canales { grid-row: 6; }
+            #segmentos { grid-row: 7; }
+            #costos { grid-row: 8; }
+            #ingresos { grid-row: 9; grid-column: 1; }
+            .modal-content { max-width: 95%; padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛸 GENERADOR FUTURISTA DE LEAN CANVAS</h1>
+    </div>
+
+    <div class="controls">
+        <div class="control-group">
+            <label for="sector">🚀 Sector de Negocio:</label>
+            <select id="sector">
+                <option value="">[SELECCIONA UN SECTOR]</option>
+                <option value="software">Desarrollo de Software</option>
+                <option value="ciberseguridad">Ciberseguridad</option>
+            </select>
+        </div>
+        <button onclick="generarArquetipo()">
+            ✨ GENERAR ARQUETIPO FUTURISTA
+        </button>
+    </div>
+
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Procesando datos cuánticos... Por favor espera.</p>
+    </div>
+
+    <div class="canvas-container">
+        <h2 class="canvas-title" id="canvasTitle">🧬 MODELO CANVAS - ESTRATEGIA INNOVADORA EN TECNOLOGÍAS AVANZADAS</h2>
+        
+        <div class="lean-canvas">
+            <div id="problema" class="section" onclick="showZoom(this)">
+                <div class="section-header">🎯 PROBLEMA</div>
+                <div class="section-content">
+                    <ul id="problema-list"></ul>
+                </div>
+            </div>
+
+            <div id="solucion" class="section" onclick="showZoom(this)">
+                <div class="section-header">🔧 SOLUCIÓN</div>
+                <div class="section-content">
+                    <ul id="solucion-list"></ul>
+                </div>
+            </div>
+
+            <div id="metricas" class="section" onclick="showZoom(this)">
+                <div class="section-header">📊 MÉTRICAS CLAVE</div>
+                <div class="section-content">
+                    <ul id="metricas-list"></ul>
+                </div>
+            </div>
+
+            <div id="propuesta" class="section" onclick="showZoom(this)">
+                <div class="section-header">💎 PROPUESTA DE VALOR ÚNICA</div>
+                <div class="section-content">
+                    <ul id="propuesta-list"></ul>
+                </div>
+            </div>
+
+            <div id="ventaja" class="section" onclick="showZoom(this)">
+                <div class="section-header">🛡️ VENTAJA INJUSTA</div>
+                <div class="section-content">
+                    <ul id="ventaja-list"></ul>
+                </div>
+            </div>
+
+            <div id="canales" class="section" onclick="showZoom(this)">
+                <div class="section-header">📡 CANALES</div>
+                <div class="section-content">
+                    <ul id="canales-list"></ul>
+                </div>
+            </div>
+
+            <div id="segmentos" class="section" onclick="showZoom(this)">
+                <div class="section-header">👥 SEGMENTOS DE CLIENTES</div>
+                <div class="section-content">
+                    <ul id="segmentos-list"></ul>
+                </div>
+            </div>
+
+            <div id="costos" class="section" onclick="showZoom(this)">
+                <div class="section-header">💸 ESTRUCTURA DE COSTOS</div>
+                <div class="section-content">
+                    <ul id="costos-list"></ul>
+                </div>
+            </div>
+
+            <div id="ingresos" class="section" onclick="showZoom(this)">
+                <div class="section-header">💰 FLUJO DE INGRESOS</div>
+                <div class="section-content">
+                    <ul id="ingresos-list"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Zoom -->
+    <div id="zoomModal" class="modal">
+        <span class="close" onclick="closeZoom()">&times;</span>
+        <div class="modal-content">
+            <h2 class="modal-header" id="modalHeader"></h2>
+            <ul class="modal-list" id="modalList"></ul>
+        </div>
+    </div>
+
+    <script>
+        const arquetipos = {
+            software: {
+                title: "🚀 CANVAS - DESARROLLO DE SOFTWARE INTELIGENTE 2042",
+                problema: [
+                    "🔴 Falta de integración automática en pipelines CI/CD cuánticos",
+                    "🔴 Dificultad para escalar microservicios en entornos híbridos cloud-edge",
+                    "🔴 Retrasos críticos en time-to-market por testing manual en IA",
+                    "🔴 Complejidad en la gestión de dependencias cross-platform",
+                    "🔴 Sobrecarga en equipos por mantenimiento legacy code",
+                    "🔴 Ineficiencias en colaboración remota multi-timezone"
+                ],
+                solucion: [
+                    "🤖 Plataforma de automatización DevOps con IA predictiva",
+                    "☁️ Orquestador serverless con auto-scaling cuántico",
+                    "⚡ Framework de testing continuo con ML auto-optimizante",
+                    "🔗 Gestor de dependencias inteligente con análisis semántico",
+                    "🛠️ Herramienta de refactorización automática basada en NLP",
+                    "🌐 Plataforma colaborativa VR para coding sessions inmersivas"
+                ],
+                propuesta: [
+                    "🌟 Transformación digital instantánea con zero-downtime y IA auto-adaptativa",
+                    "⚡ Acelera tu innovación 10x con deployment predictivo y métricas en tiempo real",
+                    "🚀 Reduce costos operativos en 50% mediante optimización inteligente"
+                ],
+                segmentos: [
+                    "💼 Equipos DevOps de startups tech de alto crecimiento",
+                    "🏢 Departamentos IT de enterprises Fortune 500",
+                    "🎓 Academias y bootcamps de desarrollo full-stack",
+                    "🆓 Desarrolladores independientes y freelancers ágiles",
+                    "🏭 Industrias manufactureras adoptando Industry 4.0",
+                    "📱 Empresas de mobile app development escalables"
+                ],
+                metricas: [
+                    "📈 Tasa de adopción de features (DAU/MAU > 70%)",
+                    "⚡ Reducción time-to-deployment (< 3 minutos promedio)",
+                    "⭐ Net Promoter Score (NPS > 85 puntos)",
+                    "🔄 Frecuencia de releases (diario sin errores críticos)",
+                    "💰 ROI en optimizaciones (x3 en 6 meses)",
+                    "🛡️ Tasa de uptime (99.99% garantizado)"
+                ],
+                ventaja: [
+                    "🛡️ Algoritmos patentados de IA auto-optimizante (exclusivos)",
+                    "🌐 Red global de partners cloud (AWS, Azure, GCP Premium)",
+                    "📊 Dataset de 5M+ proyectos analizados con deep learning",
+                    "🔒 Certificación quantum-safe para entornos críticos",
+                    "🤝 Colaboraciones exclusivas con universidades líderes en CS",
+                    "🔮 Predicciones futuristas basadas en trends de GitHub"
+                ],
+                canales: [
+                    "🛒 AWS Marketplace & Azure Store (distribución directa)",
+                    "🎤 Keynotes en DevCon, TechCrunch Disrupt, Web Summit",
+                    "🔌 Plugins nativos GitHub, VS Code, JetBrains IDEs",
+                    "📱 Mobile SDKs para iOS/Android development",
+                    "📧 Newsletters y podcasts tech influencers",
+                    "🕸️ Integraciones con Stack Overflow y Reddit communities"
+                ],
+                ingresos: [
+                    "💎 Suscripción SaaS escalable ($99-$999/mes por equipo)",
+                    "🏆 Licencias Enterprise con white-label ($50k+/año)",
+                    "📊 Marketplace de templates y componentes premium",
+                    "🔄 Comisiones por optimizaciones generadas por IA (5%)",
+                    "👨‍🏫 Cursos y certificaciones online ($199/usuario)",
+                    "🤝 Partnerships affiliate (10% revenue share)"
+                ],
+                costos: [
+                    "☁️ Infraestructura cloud distribuida (AWS/GCP multi-región)",
+                    "👨‍💻 Salarios senior DevOps, ML Engineers, Architects",
+                    "📈 Marketing growth hacking y partnerships estratégicos",
+                    "🔬 I+D continuo en IA generativa y quantum computing",
+                    "🛡️ Seguridad y compliance audits anuales",
+                    "📚 Formación continua para equipo interno"
+                ]
+            },
+            ciberseguridad: {
+                title: "🛡️ CANVAS - CIBERDEFENSA QUÁNTICA 2042",
+                problema: [
+                    "🚨 Incremento exponencial de ataques zero-day no detectados",
+                    "🔐 Gestión compleja de identidades en ecosistemas híbridos multi-cloud",
+                    "📜 Cumplimiento normativo manual propenso a errores humanos críticos",
+                    "🕳️ Vulnerabilidades en supply chain de software de terceros",
+                    "🌐 Amenazas de ciberespionaje estatal en aumento",
+                    "📱 Riesgos en dispositivos IoT no protegidos"
+                ],
+                solucion: [
+                    "🧠 Sistema de threat hunting proactivo con IA quantum-hybrid",
+                    "🔒 Arquitectura Zero-Trust automatizada con verificación continua",
+                    "📋 Auditoría compliance inteligente con logs inmutables blockchain",
+                    "🔍 Análisis de vulnerabilidades en tiempo real con threat intel global",
+                    "🛡️ Firewall cuántico resistente a ataques post-cuánticos",
+                    "📡 Monitorización IoT con edge computing seguro"
+                ],
+                propuesta: [
+                    "🌐 Protección impenetrable del futuro digital con ciberdefensas predictivas",
+                    "⚡ Respuesta instantánea a amenazas emergentes (RT < 30 segundos)",
+                    "🔐 Cumplimiento normativo automatizado con zero overhead"
+                ],
+                segmentos: [
+                    "🏦 Instituciones financieras globales y fintechs unicornio",
+                    "🏛️ Agencias gubernamentales y organismos de defensa nacional",
+                    "🛒 Plataformas e-commerce enterprise (>$1B revenue)",
+                    "🔬 Centros de investigación y laboratorios de datos críticos",
+                    "🏥 Sistemas de salud digital y hospitales conectados",
+                    "🚀 Startups de blockchain y crypto exchanges"
+                ],
+                metricas: [
+                    "🚨 Mean Time to Respond (MTTR < 45 segundos)",
+                    "✅ Tasa de falsos positivos (< 0.3% accuracy 99.7%)",
+                    "📊 Cobertura compliance auditada (100% trazabilidad)",
+                    "🛡️ Detección de amenazas zero-day (95%+ effectiveness)",
+                    "💰 Reducción en pérdidas por breaches (80% decrease)",
+                    "🌟 Customer retention rate (>95%)"
+                ],
+                ventaja: [
+                    "🌑 Acceso privilegiado a threat intelligence de dark web en tiempo real",
+                    "🔐 Certificaciones quantum-resistant (NIST Post-Quantum)",
+                    "👥 Equipo elite ex-NSA/CISA con 25+ años experiencia operativa",
+                    "🤝 Alianzas exclusivas con vendors críticos (Microsoft, Palo Alto)",
+                    "📈 Análisis predictivo basado en big data global",
+                    "🛡️ Patentes en encriptación homomórfica avanzada"
+                ],
+                canales: [
+                    "🔗 Microsoft Azure Security Center & AWS Security Hub",
+                    "🎯 Eventos elite: Black Hat, DEF CON, RSA Conference",
+                    "🔌 APIs nativas para SIEM, SOAR, EDR platforms existentes",
+                    "📘 Framework de certificación para partners MSSP",
+                    "📧 Webinars y whitepapers para CISOs",
+                    "📰 Publicaciones en journals de ciberseguridad"
+                ],
+                ingresos: [
+                    "🎯 Modelo freemium con upsell enterprise ($0 → $25k+/mes)",
+                    "👨‍💼 Consultoría implementación estratégica ($50k-$500k)",
+                    "📈 Managed Security Services (SOC-as-a-Service $100k+/año)",
+                    "🔬 Licencias de threat intelligence anonimizada premium",
+                    "🏆 Certificaciones y training programs ($5k/participante)",
+                    "🤝 Affiliate programs con hardware security vendors"
+                ],
+                costos: [
+                    "🧪 R&D en ciberseguridad cuántica y IA adversarial",
+                    "📜 Cumplimiento legal internacional y certificaciones",
+                    "👮‍♂️ Equipo elite de ethical hackers y threat researchers",
+                    "🌍 Infraestructura global de sensores y honeypots distribuidos",
+                    "📈 Marketing en conferencias y sponsorships",
+                    "🛡️ Inversiones en herramientas de simulación de ataques"
+                ]
+            }
+        };
+
+        function mostrarLoading(estado) {
+            document.getElementById('loading').classList.toggle('visible', estado);
+        }
+
+        function limpiarCanvas() {
+            const sections = ['problema', 'solucion', 'propuesta', 'segmentos', 'metricas', 'ventaja', 'canales', 'ingresos', 'costos'];
+            sections.forEach(sec => {
+                document.getElementById(sec + '-list').innerHTML = '';
+                document.getElementById(sec).classList.remove('visible');
+            });
+            document.getElementById('canvasTitle').textContent = '🧬 MODELO CANVAS - ESTRATEGIA INNOVADORA EN TECNOLOGÍAS AVANZADAS';
+        }
+
+        function generarArquetipo() {
+            const sector = document.getElementById('sector').value;
+            if (!sector) {
+                alert('⚠️ Por favor, selecciona un sector para generar el arquetipo.');
+                return;
+            }
+
+            limpiarCanvas();
+            mostrarLoading(true);
+
+            setTimeout(() => {
+                const data = arquetipos[sector];
+                document.getElementById('canvasTitle').textContent = data.title;
+
+                const sections = ['problema', 'solucion', 'propuesta', 'segmentos', 'metricas', 'ventaja', 'canales', 'ingresos', 'costos'];
+                sections.forEach((sec, index) => {
+                    const list = document.getElementById(sec + '-list');
+                    list.innerHTML = '';
+                    data[sec].forEach((item, itemIndex) => {
+                        setTimeout(() => {
+                            const li = document.createElement('li');
+                            li.textContent = item;
+                            list.appendChild(li);
+                        }, itemIndex * 150);
+                    });
+                    setTimeout(() => {
+                        document.getElementById(sec).classList.add('visible');
+                    }, index * 200);
+                });
+
+                mostrarLoading(false);
+                document.querySelector('.canvas-container').scrollIntoView({ behavior: 'smooth' });
+            }, 1000);
+        }
+
+        document.getElementById('sector').addEventListener('change', function() {
+            if (this.value) generarArquetipo();
+        });
+
+        // Funciones para Modal Zoom
+        function showZoom(section) {
+            const modal = document.getElementById('zoomModal');
+            const modalHeader = document.getElementById('modalHeader');
+            const modalList = document.getElementById('modalList');
+
+            modalHeader.textContent = section.querySelector('.section-header').textContent;
+            modalList.innerHTML = section.querySelector('ul').innerHTML;
+
+            modal.style.display = 'flex';
+        }
+
+        function closeZoom() {
+            const modal = document.getElementById('zoomModal');
+            modal.style.display = 'none';
+        }
+
+        // Cerrar modal al click fuera
+        window.onclick = function(event) {
+            const modal = document.getElementById('zoomModal');
+            if (event.target === modal) {
+                closeZoom();
+            }
+        }
+    </script>
+</body>
+</html>
